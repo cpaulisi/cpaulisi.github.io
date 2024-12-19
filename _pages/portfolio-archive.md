@@ -1,10 +1,7 @@
 ---
-title: Portfolio
-layout: collection
 permalink: /portfolio/
-collection: portfolio
-entries_layout: grid
-classes: wide
+layout: home
+author_profile: true
+entries_layout: list
+paginate: 5          # Number of posts per page
 ---
-
-Sample document listing for the collection `_portfolio`.
