@@ -1,0 +1,149 @@
+<div class="waveform-bg" aria-hidden="true">
+  <canvas id="waveform"></canvas>
+</div>
+
+<script is:inline>
+(function() {
+  const canvas = document.getElementById('waveform');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let t = 0;
+  let scrollY = 0;
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  window.addEventListener('scroll', function() { scrollY = window.scrollY; }, { passive: true });
+
+  function hexToRgb(hex) {
+    hex = hex.replace('#', '');
+    if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    return [parseInt(hex.slice(0,2),16), parseInt(hex.slice(2,4),16), parseInt(hex.slice(4,6),16)];
+  }
+
+  // Value noise with larger permutation table for varied terrain
+  var noiseP = [];
+  for (var i = 0; i < 512; i++) noiseP[i] = Math.random();
+  function noise(x) {
+    var xi = Math.floor(x) & 511;
+    var xf = x - Math.floor(x);
+    var u = xf * xf * (3 - 2 * xf);
+    return noiseP[xi] * (1 - u) + noiseP[(xi + 1) & 511] * u;
+  }
+  function fbm(x, octaves) {
+    var v = 0, amp = 1, freq = 1, total = 0;
+    for (var i = 0; i < octaves; i++) {
+      v += noise(x * freq) * amp;
+      total += amp;
+      amp *= 0.5;
+      freq *= 2;
+    }
+    return v / total;
+  }
+  // Ridged noise — creates sharper peaks like mountain ridges
+  function ridged(x, octaves) {
+    var v = 0, amp = 1, freq = 1, total = 0;
+    for (var i = 0; i < octaves; i++) {
+      var n = Math.abs(noise(x * freq) * 2 - 1);
+      v += (1 - n) * (1 - n) * amp;
+      total += amp;
+      amp *= 0.5;
+      freq *= 2.2;
+    }
+    return v / total;
+  }
+
+  // Mountain ranges: back (distant) to front (near)
+  // Each layer: ridgeline y position, peak height, noise scale, alpha, fog opacity, parallax
+  var ranges = [
+    { yOff: 0.38, peakH: 120, noiseScale: 0.0012, seed: 0,   alpha: 0.04, fogAlpha: 0.03, parallax: -0.12 },
+    { yOff: 0.45, peakH: 140, noiseScale: 0.0015, seed: 50,  alpha: 0.06, fogAlpha: 0.04, parallax: -0.08 },
+    { yOff: 0.53, peakH: 160, noiseScale: 0.0018, seed: 100, alpha: 0.09, fogAlpha: 0.05, parallax: -0.04 },
+    { yOff: 0.62, peakH: 180, noiseScale: 0.002,  seed: 150, alpha: 0.12, fogAlpha: 0.06, parallax: 0.0   },
+    { yOff: 0.72, peakH: 200, noiseScale: 0.0025, seed: 200, alpha: 0.16, fogAlpha: 0.07, parallax: 0.05  },
+    { yOff: 0.83, peakH: 210, noiseScale: 0.003,  seed: 250, alpha: 0.20, fogAlpha: 0.00, parallax: 0.10  },
+  ];
+
+  var step = 3;
+
+  function draw() {
+    var w = canvas.width;
+    var h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    var style = getComputedStyle(document.documentElement);
+    var color = style.getPropertyValue('--color-accent').trim();
+    var rgb = hexToRgb(color);
+
+    for (var i = 0; i < ranges.length; i++) {
+      var rng = ranges[i];
+      var parallaxOffset = scrollY * rng.parallax;
+      var baseY = h * rng.yOff + parallaxOffset;
+
+      // Build ridgeline path
+      ctx.beginPath();
+      for (var x = 0; x <= w; x += step) {
+        var nx = x * rng.noiseScale + rng.seed;
+        // Combine ridged noise (sharp peaks) with smooth fbm (rolling hills)
+        var ridge = ridged(nx, 5);
+        var smooth = fbm(nx * 0.8 + rng.seed * 0.3, 4);
+        var peakY = baseY - (ridge * 0.65 + smooth * 0.35) * rng.peakH;
+        // Subtle slow drift for life
+        peakY += Math.sin(t * 0.3 + x * 0.001 + rng.seed) * 2;
+        if (x === 0) ctx.moveTo(x, peakY);
+        else ctx.lineTo(x, peakY);
+      }
+      // Close path down to bottom of canvas
+      ctx.lineTo(w, h);
+      ctx.lineTo(0, h);
+      ctx.closePath();
+
+      // Fill mountain silhouette — gradient from peak color to slightly transparent at base
+      var grad = ctx.createLinearGradient(0, baseY - rng.peakH, 0, h);
+      grad.addColorStop(0, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + rng.alpha + ')');
+      grad.addColorStop(0.4, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + (rng.alpha * 0.7) + ')');
+      grad.addColorStop(1, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + (rng.alpha * 0.3) + ')');
+      ctx.fillStyle = grad;
+      ctx.globalAlpha = 1;
+      ctx.fill();
+
+      // Fog layer between this range and the next — soft full-width gradient
+      if (rng.fogAlpha > 0) {
+        var fogCenter = baseY;
+        var fogSpread = rng.peakH * 0.6;
+        var fogGrad = ctx.createLinearGradient(0, fogCenter - fogSpread, 0, fogCenter + fogSpread);
+        fogGrad.addColorStop(0, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',0)');
+        fogGrad.addColorStop(0.4, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + rng.fogAlpha + ')');
+        fogGrad.addColorStop(0.6, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + rng.fogAlpha + ')');
+        fogGrad.addColorStop(1, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',0)');
+        ctx.fillStyle = fogGrad;
+        ctx.globalAlpha = 1;
+        ctx.fillRect(0, fogCenter - fogSpread, w, fogSpread * 2);
+      }
+    }
+
+    t += 0.005;
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+})();
+</script>
+
+<style>
+  .waveform-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .waveform-bg canvas {
+    width: 100%;
+    height: 100%;
+  }
+</style>
