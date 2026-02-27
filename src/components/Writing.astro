@@ -1,0 +1,33 @@
+---
+const posts = [
+  {
+    title: "Coming soon",
+    date: "2026",
+    summary: "First post is on the way. Check back shortly.",
+    tags: ["Meta"],
+  },
+];
+---
+
+<section id="writing" class="py-16">
+  <h2 class="font-mono font-bold text-lg mb-8" style="color: var(--color-text);">
+    <span style="color: var(--color-accent);">#</span> Writing
+  </h2>
+  <div class="space-y-6">
+    {posts.map((post) => (
+      <article class="pb-6 border-b" style="border-color: var(--color-border);">
+        <div class="flex items-center gap-3 mb-1.5">
+          <time class="font-mono text-xs" style="color: var(--color-text-faint);">{post.date}</time>
+          {post.tags.map((tag) => (
+            <span class="font-mono text-[10px] px-1.5 py-0.5 rounded"
+              style={`background-color: var(--color-tag-bg); color: var(--color-tag-text);`}>
+              {tag}
+            </span>
+          ))}
+        </div>
+        <h3 class="font-mono font-semibold mb-1" style="color: var(--color-text);">{post.title}</h3>
+        <p class="text-sm" style="color: var(--color-text-muted);">{post.summary}</p>
+      </article>
+    ))}
+  </div>
+</section>

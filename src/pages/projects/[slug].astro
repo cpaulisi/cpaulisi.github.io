@@ -1,0 +1,43 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Sidebar from "../../components/Sidebar.astro";
+import { projects } from "../../data/projects";
+
+export function getStaticPaths() {
+  return projects.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+---
+
+<BaseLayout title={`${project.title} — Cullen Paulisick`}>
+  <Sidebar />
+  <main class="md:ml-56 pt-14 md:pt-0 min-h-screen px-6 md:px-12 lg:px-16 max-w-4xl">
+    <div class="py-12 md:py-16">
+      <a href="/#projects" class="inline-flex items-center gap-1 font-mono text-xs mb-8 transition-colors hover:opacity-80"
+        style="color: var(--color-accent);">
+        &larr; Projects
+      </a>
+
+      <h1 class="font-mono font-bold text-xl mb-4" style="color: var(--color-text);">
+        {project.title}
+      </h1>
+
+      <div class="flex flex-wrap gap-1.5 mb-8">
+        {project.tags.map((tag: string) => (
+          <span class="font-mono text-[10px] px-1.5 py-0.5 rounded"
+            style={`background-color: var(--color-tag-bg); color: var(--color-tag-text);`}>
+            {tag}
+          </span>
+        ))}
+      </div>
+
+      <div class="text-sm leading-relaxed" style="color: var(--color-text-muted);">
+        <p>{project.body}</p>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
