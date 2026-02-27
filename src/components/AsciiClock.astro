@@ -1,0 +1,42 @@
+<div id="ascii-clock" class="ascii-clock" aria-hidden="true"></div>
+
+<script is:inline>
+(function() {
+  var el = document.getElementById('ascii-clock');
+  if (!el) return;
+
+  function update() {
+    var now = new Date();
+    var h = now.getHours();
+    var m = String(now.getMinutes()).padStart(2, '0');
+    var period = h >= 12 ? 'PM' : 'AM';
+    var displayH = h % 12 || 12;
+    el.textContent = displayH + ':' + m + ' ' + period;
+  }
+
+  update();
+  setInterval(update, 1000);
+})();
+</script>
+
+<style>
+  .ascii-clock {
+    position: fixed;
+    top: 1.25rem;
+    right: 1.5rem;
+    z-index: 50;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    color: var(--color-text-faint);
+    pointer-events: none;
+    user-select: none;
+    opacity: 0.7;
+  }
+
+  @media (max-width: 768px) {
+    .ascii-clock {
+      display: none;
+    }
+  }
+</style>

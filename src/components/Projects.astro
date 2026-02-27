@@ -10,7 +10,7 @@ import { projects } from "../data/projects";
     {projects.map((project) => (
       <a href={`/projects/${project.slug}`}
         class="relative z-10 block p-4 border rounded transition-colors hover:border-(--color-accent)"
-        style={`border-color: var(--color-border); background-color: var(--color-bg);`}>
+        style={`border-color: var(--color-border); background-color: var(--color-bg-secondary);`}>
         <h3 class="font-mono font-semibold text-sm mb-2" style="color: var(--color-text);">{project.title}</h3>
         <p class="text-xs mb-3" style="color: var(--color-text-muted);">{project.description}</p>
         <div class="flex flex-wrap gap-1.5">
