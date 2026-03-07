@@ -12,12 +12,12 @@
   --color-text: #1a1a1a;
   --color-text-muted: #6b6b6b;
   --color-text-faint: #999999;
-  --color-accent: #0891b2;
-  --color-accent-dim: #0891b233;
+  --color-accent: #e97316;
+  --color-accent-dim: #e9731633;
   --color-border: #e0e0dc;
   --color-surface: #ffffff;
-  --color-tag-bg: #e0f7fa;
-  --color-tag-text: #0e7490;
+  --color-tag-bg: #fff7ed;
+  --color-tag-text: #c2410c;
 }
 
 /* Dark mode */
@@ -27,12 +27,12 @@
   --color-text: #e0e0e0;
   --color-text-muted: #888888;
   --color-text-faint: #555555;
-  --color-accent: #22d3ee;
-  --color-accent-dim: #22d3ee33;
+  --color-accent: #fb923c;
+  --color-accent-dim: #fb923c33;
   --color-border: #1f1f1f;
   --color-surface: #111111;
-  --color-tag-bg: #0891b222;
-  --color-tag-text: #22d3ee;
+  --color-tag-bg: #e9731622;
+  --color-tag-text: #fb923c;
 }
 
 html {
