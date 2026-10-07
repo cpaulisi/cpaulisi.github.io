@@ -38,7 +38,7 @@ export const projects: Project[] = [
   {
     slug: "quorum-sensing-tools",
     title: "Computational Tools for Quorum Sensing Research",
-    description: "Signal processing and image analysis tools for studying bacterial communication pathways in the Sgro Lab.",
+    description: "Signal processing and image analysis tools for studying bacterial communication pathways and emergent systems in the Sgro Lab.",
     tags: ["Synthetic Biology", "MATLAB", "Python"],
     body: "Designed biological and digital signal processing tools used by lab members at the Sgro Laboratory at Boston University. Scripted MATLAB and Python image analysis tools via PIL for research conducted on bacterial quorum sensing pathways. Supported the research team in creating viral transfection protocols for B. subtilis and over 45 workflows for restriction enzyme digests. Named as Distinguished Summer Research Fellow, securing $10,000 in funding.",
   },
